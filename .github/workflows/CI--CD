@@ -1,0 +1,97 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: mysql:latest
+        env:
+          MYSQL_ROOT_PASSWORD: 1234
+          MYSQL_DATABASE: notesdb
+          MYSQL_USER: user
+          MYSQL_PASSWORD: 1234
+        ports:
+          - 3306:3306
+        options: >-
+          --mount type=volume,source=db_data,target=/var/lib/mysql
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Install Docker Compose
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y docker-compose
+
+    - name: Build frontend image
+      run: |
+        cd frontend
+        docker build -t my-frontend .
+
+    - name: Build backend image
+      run: |
+        cd backend
+        docker build -t my-backend .
+
+    - name: Build static-files image
+      run: |
+        cd static-files
+        docker build -t my-static-files .
+
+    - name: Build auth-service image
+      run: |
+        cd auth-service
+        docker build -t my-auth-service .
+
+    - name: Run Docker Compose
+      run: |
+        docker-compose up -d
+
+    - name: Run Tests (если есть)
+      run: |
+        # Здесь можно добавить команды для запуска тестов, если они у вас есть.
+        # Например, если у вас есть тесты для backend:
+        # cd backend && python -m unittest discover
+
+    - name: Cleanup
+      if: always()
+      run: |
+        docker-compose down
+
+  cd:
+    runs-on: ubuntu-latest
+    needs: ci  # Зависимость от job ci
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Build and push images
+      run: |
+        # Здесь можно добавить команды для сборки и пуша образов в реестр, если необходимо.
+        # Например, если вы используете Docker Hub:
+         echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+         docker push frontend
+         docker push backend
+         docker push static-files
+         docker push auth-service
+
+    - name: Deploy to Productio
+      run: |
+        # Здесь можно добавить команды для развертывания вашего приложения.
+        # Например, если вы используете SSH для развертывания на сервере:
+        # ssh user@your-server "docker-compose pull && docker-compose up -d"
