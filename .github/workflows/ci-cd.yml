@@ -19,8 +19,8 @@ jobs:
           MYSQL_PASSWORD: 1234
         ports:
           - 3306:3306
-        volumes:
-          - db_data:/var/lib/mysql
+        options: >-
+          --mount type=volume,source=db_data,target=/var/lib/mysql
 
     steps:
     - name: Checkout code
@@ -63,6 +63,3 @@ jobs:
       if: always()
       run: |
         docker-compose down
-
-volumes:
-  db_data:
