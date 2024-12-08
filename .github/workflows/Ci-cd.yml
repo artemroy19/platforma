@@ -83,12 +83,16 @@ jobs:
 
     - name: Build and push images
       run: |
-        echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-        docker push frontend
-        docker push backend
-        docker push static-files
-        docker push auth-service
+        # Здесь можно добавить команды для сборки и пуша образов в реестр, если необходимо.
+        # Например, если вы используете Docker Hub:
+        # echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+        # docker push my-frontend
+        # docker push my-backend
+        # docker push my-static-files
+        # docker push my-auth-service
 
     - name: Deploy to Production (или staging)
       run: |
-        ssh user@your-server "docker-compose pull && docker-compose up -d"
+        # Здесь можно добавить команды для развертывания вашего приложения.
+        # Например, если вы используете SSH для развертывания на сервере:
+        # ssh user@your-server "docker-compose pull && docker-compose up -d"
