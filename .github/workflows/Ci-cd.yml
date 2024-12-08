@@ -84,10 +84,10 @@ jobs:
     - name: Build and push images
       run: |
         echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-        docker push my-frontend
-        docker push my-backend
-        docker push my-static-files
-        docker push my-auth-service
+        docker push frontend
+        docker push backend
+        docker push static-files
+        docker push auth-service
 
     - name: Deploy to Production (или staging)
       run: |
