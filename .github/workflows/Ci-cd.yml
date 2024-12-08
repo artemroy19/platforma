@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  ci:
+  build:
     runs-on: ubuntu-latest
 
     services:
@@ -60,7 +60,7 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    needs: ci  # Зависимость от job ci
+    needs: build  # Зависимость от job ci
 
     steps:
     - name: Checkout code
@@ -70,7 +70,7 @@ jobs:
       run: |
         cd backend && python -m unittest discover tests
 
-  cd:
+  push:
     runs-on: ubuntu-latest
     needs: test  # Зависимость от job test
 
