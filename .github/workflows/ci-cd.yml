@@ -58,7 +58,7 @@ jobs:
       run: |
         docker-compose up -d
 
-    - name: Run Tests (если есть)
+    - name: Run Tests
       run: |
         # Здесь можно добавить команды для запуска тестов, если они у вас есть.
         # Например, если у вас есть тесты для backend:
