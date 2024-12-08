@@ -13,10 +13,10 @@ jobs:
       db:
         image: mysql:latest
         env:
-          MYSQL_ROOT_PASSWORD: 1234
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
           MYSQL_DATABASE: notesdb
           MYSQL_USER: user
-          MYSQL_PASSWORD: 1234
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
         ports:
           - 3306:3306
         options: >-
@@ -34,35 +34,45 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y docker-compose
 
+    - name: Login to Docker Hub
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
     - name: Build and push frontend image
       run: |
         cd frontend
-        docker build -t my-frontend .
+        docker build -t ${{ secrets.DOCKER_REPO }}/my-frontend:latest .
+        docker push ${{ secrets.DOCKER_REPO }}/my-frontend:latest
 
     - name: Build and push backend image
       run: |
         cd backend
-        docker build -t my-backend .
+        docker build -t ${{ secrets.DOCKER_REPO }}/my-backend:latest .
+        docker push ${{ secrets.DOCKER_REPO }}/my-backend:latest
 
     - name: Build and push static-files image
       run: |
         cd static-files
-        docker build -t my-static-files .
+        docker build -t ${{ secrets.DOCKER_REPO }}/my-static-files:latest .
+        docker push ${{ secrets.DOCKER_REPO }}/my-static-files:latest
 
     - name: Build and push auth-service image
       run: |
         cd auth-service
-        docker build -t my-auth-service .
+        docker build -t ${{ secrets.DOCKER_REPO }}/my-auth-service:latest .
+        docker push ${{ secrets.DOCKER_REPO }}/my-auth-service:latest
 
-    - name: Run Docker Compose
+    - name: Run Docker Compose with images from registry
       run: |
-        docker-compose up -d
+        docker-compose up -d --build --remove-orphans #Добавил --remove-orphans для удаления "сиротских" контейнеров
 
-    - name: Run Tests
+    - name: Run Tests (Example)
       run: |
-        # Здесь можно добавить команды для запуска тестов, если они у вас есть.
-        # Например, если у вас есть тесты для backend:
-        # cd backend && python -m unittest discover
+        cd backend
+        npm test # Пример для Node.js
+        cd ../frontend
+        npm test # Пример для Node.js
+        # Добавить тесты для других сервисов.
+        # Используйте соответствующие команды для ваших фреймворков и языков программирования.
 
     - name: Cleanup
       if: always()
