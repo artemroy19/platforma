@@ -1,0 +1,58 @@
+version: "3.9"
+services:
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8082:80"
+    networks:
+      - my_network
+
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    restart: always 
+    depends_on:
+      - db
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+    networks:
+      - my_network
+
+  db:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: notesdb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: 1234
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - my_network
+
+  static-files:
+    build: ./static-files
+    ports:
+      - "8081:80"
+    volumes:
+      - ./static-files/files:/usr/share/nginx/html
+    networks:
+      - my_network
+
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "5003:5003"
+    networks:
+      - my_network
+
+volumes:
+  db_data:
+
+networks:
+  my_network:
+    driver:
+      bridge
+
