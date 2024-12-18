@@ -1,0 +1,190 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: frontend-image:latest 
+          ports:
+            - containerPort: 80
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: backend-image:latest 
+          ports:
+            - containerPort: 5000
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+        - name: db
+          image: mysql:latest
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "1234"
+            - name: MYSQL_DATABASE
+              value: "notesdb"
+            - name: MYSQL_USER
+              value: "user"
+            - name: MYSQL_PASSWORD
+              value: "1234"
+          ports:
+            - containerPort: 3306
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+        - name: auth-service
+          image: auth-service-image:latest 
+          ports:
+            - containerPort: 5003
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: static-files
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: static-files
+  template:
+    metadata:
+      labels:
+              app: static-files
+    spec:
+      containers:
+        - name: static-files
+          image: static-files-image:latest 
+          ports:
+            - containerPort: 80
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30001 
+  selector:
+    app: frontend
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  type: NodePort
+  ports:
+    - port: 5000
+      targetPort: 5000 
+      nodePort: 30002 
+  selector:
+    app: backend
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-service
+spec:
+  type: ClusterIP 
+  ports:
+    - port: 3306 
+      targetPort: 3306 
+  selector:
+    app: db
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service 
+spec:
+  type: NodePort 
+  ports:
+    - port: 5003 
+      targetPort: 5003 
+      nodePort: 30003 
+  selector:
+    app: auth-service 
+
+---
+
+apiVersion: v1
+kind: Service 
+metadata:
+  name: static-files-service 
+spec:
+  type: NodePort 
+  ports:
+    - port: 80 
+      targetPort: 80 
+      nodePort: 30004 
+  selector:
+    app: static-files 
